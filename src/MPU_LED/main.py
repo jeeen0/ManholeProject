@@ -10,18 +10,6 @@ db = []
 
 @app.route('/home')
 def home():
-    # ARD = serial.Serial(PORT, BaudRate)
-    # LINE = ARD.readline()
-    # state, accelX, accelY, accelZ = LINE[:len(LINE) - 2].decode("utf-8").split(',')
-    # if state == "LIGHT ON":
-    #     message = f"기울임이 감지되었습니다: {accelX, accelY, accelZ}"
-    # elif state == "off":
-    #     message = ". . ."
-    # else:
-    #     message = "Wrong access from _Decode_"
-    # # code = Ardread(ARD)
-    # db.append(message)
-    # return render_template("home.html", DataHtml=db)
     return render_template("home.html")
 
 @socketio.on('connect')
