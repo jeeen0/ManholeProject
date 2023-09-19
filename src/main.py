@@ -1,54 +1,28 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO
-import serial
+from flask import Flask, render_template        # pip install flask
+from flask_socketio import SocketIO, emit       # pip install flask_socketio
+import serial       #pip install pyserial
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 PORT = "COM8"
 BaudRate = 9600
-db = []
-
-@app.route('/home')
-def home():
-    # ARD = serial.Serial(PORT, BaudRate)
-    # LINE = ARD.readline()
-    # state, accelX, accelY, accelZ = LINE[:len(LINE) - 2].decode("utf-8").split(',')
-    # if state == "LIGHT ON":
-    #     message = f"기울임이 감지되었습니다: {accelX, accelY, accelZ}"
-    # elif state == "off":
-    #     message = ". . ."
-    # else:
-    #     message = "Wrong access from _Decode_"
-    # # code = Ardread(ARD)
-    # db.append(message)
-    # return render_template("home.html", DataHtml=db)
-    return render_template("home.html")
-
-@socketio.on('connect')
-def handle_connect():
-    print("웹 소켓 연결")
-    
-@socketio.on("disconnect")
-def handle_disconnect():
-    print("웹 소켓 연결 해제")
-
-@socketio.on("get_sensor_data")
-def get_sensor_data():
-    ARD = serial.Serial(PORT, BaudRate)
-    LINE = ARD.readline()
-    state, accelX, accelY, accelZ = LINE[:len(LINE) - 2].decode("utf-8").split(',')
-    if state == "LIGHT ON":
-        sensor_data = f"기울임이 감지되었습니다: {accelX, accelY, accelZ}"
-    elif state == "off":
-        sensor_data = ". . ."
-    else:
-        sensor_data = "Wrong access from _Decode_"
-    socketio.emit('sensor_data', sensor_data)
-    
+ARD = serial.Serial(PORT, BaudRate)
 
 @app.route('/')
-def location():
-    return render_template("location.html")
+def home():
+    return render_template("home.html")
+
+def read_serial():
+    stop_flag = False
+    while not stop_flag:
+        if ARD.readable():
+            LINE = ARD.readline()
+            # data = LINE[:len(LINE) - 2].decode("utf-8").split(',')
+            data = LINE[:len(LINE) - 2].decode("cp949")
+            print(data)
+            socketio.emit('arduino_data', data)
 
 if __name__ == "__main__":
+    socketio.start_background_task(target=read_serial)
     socketio.run(app)
