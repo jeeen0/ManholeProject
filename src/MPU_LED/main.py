@@ -28,4 +28,4 @@ def read_serial():
 
 if __name__ == "__main__":
     socketio.start_background_task(target=read_serial)
-    socketio.run(app)
+    socketio.run(app) 
